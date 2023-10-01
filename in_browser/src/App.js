@@ -19,7 +19,7 @@ const App = () => {
   const modelInputShape = [1, 3, 320, 320];
   const topk = 100;
   const iouThreshold = 0.45;
-  const scoreThreshold = 0.25;
+  const scoreThreshold = 0.1;
 
   // wait until opencv.js initialized
   cv["onRuntimeInitialized"] = async () => {

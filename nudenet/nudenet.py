@@ -110,6 +110,7 @@ class NudeDetector:
         self.input_width = input_shape[2]  # 320
         self.input_height = input_shape[3]  # 320
         self.input_name = model_inputs[0].name
+        self.detection_threshold = detection_threshold
 
     def detect(self, image_path):
         preprocessed_image, image_width, image_height = _read_image(
@@ -117,7 +118,7 @@ class NudeDetector:
         )
         outputs = self.onnx_session.run(None, {self.input_name: preprocessed_image})
         detections = _postprocess(
-            outputs, image_width, image_height, self.input_width, self.input_height
+            outputs, image_width, image_height, self.input_width, self.input_height, self.detection_threshold
         )
 
         return detections
