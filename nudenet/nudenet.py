@@ -61,7 +61,7 @@ def _read_image(image_path, target_size=320):
     return image_data, img_width, img_height
 
 
-def _postprocess(output, img_width, img_height, input_width, input_height):
+def _postprocess(output, img_width, img_height, input_width, input_height, detection_threshold):
     outputs = np.transpose(np.squeeze(output[0]))
     rows = outputs.shape[0]
     boxes = []
@@ -74,7 +74,7 @@ def _postprocess(output, img_width, img_height, input_width, input_height):
         classes_scores = outputs[i][4:]
         max_score = np.amax(classes_scores)
 
-        if max_score >= 0.2:
+        if max_score >= detection_threshold:
             class_id = np.argmax(classes_scores)
             x, y, w, h = outputs[i][0], outputs[i][1], outputs[i][2], outputs[i][3]
             left = int((x - w / 2) * x_factor)
@@ -85,7 +85,7 @@ def _postprocess(output, img_width, img_height, input_width, input_height):
             scores.append(max_score)
             boxes.append([left, top, width, height])
 
-    indices = cv2.dnn.NMSBoxes(boxes, scores, 0.25, 0.45)
+    indices = cv2.dnn.NMSBoxes(boxes, scores, detection_threshold, 0.45)
 
     detections = []
     for i in indices:
@@ -100,7 +100,7 @@ def _postprocess(output, img_width, img_height, input_width, input_height):
 
 
 class NudeDetector:
-    def __init__(self):
+    def __init__(self, detection_threshold=0.1):
         self.onnx_session = onnxruntime.InferenceSession(
             os.path.join(os.path.dirname(__file__), "best.onnx"),
             providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
